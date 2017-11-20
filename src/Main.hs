@@ -7,6 +7,7 @@ import Control.Comonad.Representable.Store
 import Control.Comonad
 import Control.Monad
 import Data.Bifunctor
+import qualified Data.ByteString as B
 import Data.Distributive
 import Data.Foldable
 import Data.Functor.Rep
@@ -14,10 +15,17 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Map.Lazy as M
 import Data.Map.Lazy (Map(..))
 import Data.MemoTrie
+import Data.Traversable
+import Graphics.Gloss
+import Graphics.Gloss.Data.Bitmap
+import Graphics.Gloss.Data.Picture
 import System.Random
 
 boardSize :: Int
 boardSize = 50
+
+screenSize :: Int
+screenSize = 500
 
 wrap :: Int -> ((Int, Int) -> a) -> (Int, Int) -> a
 wrap n f p =
@@ -78,10 +86,23 @@ printBoard x y b = do
     putStrLn ""
   putStrLn ""
 
+renderBoard :: Board -> Picture
+renderBoard b =
+  Pictures $ do
+    y <- [1..boardSize]
+    x <- [1..boardSize]
+    return $ if peek (x,y) b then cell x y else blank
+
+cell x y = polygon [(f x, f y), (f (x + 1), f y), (f (x + 1), f (y + 1)), (f x, f (y + 1))]
+  where f v = fromIntegral $ v * (screenSize `div` boardSize) - screenSize `div` 2 - 1
+
 main :: IO ()
-main = randomBoard 50 >>= go
-  where
-    go b = do
-      printBoard 100 50 b
-      go $ lifeStep b
+main =
+  randomBoard boardSize >>= \b ->
+    simulate (InWindow "Conway's Game of Life" (screenSize, screenSize) (10, 10))
+             white
+             10
+             b
+             renderBoard
+             (\_ _ -> lifeStep)
 

@@ -59,7 +59,7 @@ executable Life
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.9 && <4.10, adjunctions >=4.3 && <4.4, 
                        containers >=0.5 && <0.6, comonad >3, random,
-                       MemoTrie, distributive
+                       MemoTrie, distributive, gloss, bytestring, GLUT
   
   -- Directories containing source files.
   hs-source-dirs:      src
